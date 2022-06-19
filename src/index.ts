@@ -16,6 +16,9 @@ import CarType from './data/car-type';
 import { Car } from './data/car';
 import { Vehicle } from './data/vehicle';
 import { orderCoffe } from './asynchronous/order-coffe';
+import { Todo } from './observable/demo/todo.model';
+import { TodoService } from './observable/demo/todo.service';
+import { combineLatest, map } from 'rxjs';
 
 // const vehicle: Vehicle = {
 //   id: '123',
@@ -81,27 +84,73 @@ import { orderCoffe } from './asynchronous/order-coffe';
 // }).catch(error => console.log(error))
 
 // Async - Await
-const myOrder = (order: string): Promise<string> => {
-  return new Promise<string>((resolve, reject) => {
-    orderCoffe(order, reject, resolve)
-  })
+// const myOrder = (order: string): Promise<string> => {
+//   return new Promise<string>((resolve, reject) => {
+//     orderCoffe(order, reject, resolve)
+//   })
+// }
+//
+// async function listOrderCoffe(): Promise<void> {
+//   try {
+//     const kopiTarik = await myOrder('Kopi Tarik');
+//     const kopiABC = await myOrder('Kopi ABC');
+//     const kopiSusuKambing = await myOrder('Kopi Susu Kambing');
+//     console.log(kopiTarik);
+//     console.log(kopiABC);
+//     console.log(kopiSusuKambing);
+//
+//     const teh = await myOrder('Teh')
+//     console.log(teh);
+//
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
+//
+// listOrderCoffe()
+
+// 19 Juni 2022
+/*
+* Reactive Programming ?
+* */
+
+const todo: Todo = {
+  label: 'Makan',
+  isDone: false
 }
 
-async function listOrderCoffe(): Promise<void> {
-  try {
-    const kopiTarik = await myOrder('Kopi Tarik');
-    const kopiABC = await myOrder('Kopi ABC');
-    const kopiSusuKambing = await myOrder('Kopi Susu Kambing');
-    console.log(kopiTarik);
-    console.log(kopiABC);
-    console.log(kopiSusuKambing);
+const todoService: TodoService = new TodoService();
+// const todoPromise: Promise<Todo> = todoService.addPromise(todo);
 
-    const teh = await myOrder('Teh')
-    console.log(teh);
+// with observable
+combineLatest([
+  todoService.add({label: 'Makan', isDone: false}),
+  todoService.add({label: 'Minum', isDone: true}),
+  todoService.add({label: 'Tidur', isDone: false}),
+  todoService.add({label: 'Ngoding', isDone: true}),
+]).subscribe((todos: Todo[]) => {
+  console.log(`${todos.length} todo item telah di tambahkan`);
+});
 
-  } catch (error) {
-    console.log(error);
+todoService.add({label: 'Jalan-Jalan', isDone: false}).subscribe()
+todoService.update({id: 1, label: 'Makan', isDone: true}).subscribe()
+todoService.delete({id: 5, label: 'Jalan-Jalan', isDone: false}).subscribe()
+
+todoService.notify().subscribe((isUpdated: boolean) => {
+  if (isUpdated) {
+    todoService.list()
+        .pipe(
+            map((list: Todo[]) => {
+              return list.map((todo: Todo) => {
+                return `Todo ${todo.label} ${( todo.isDone ? 'sudah selesai' : 'belum selesai')}`;
+              });
+            }),
+        )
+        .subscribe((list: any[]) => {
+          console.log('Todo List', list);
+        });
   }
-}
+});
 
-listOrderCoffe()
+
+

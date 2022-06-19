@@ -10,5 +10,8 @@
   },
   "keywords": [],
   "author": "Jution Candra Kirana",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "rxjs": "^7.5.5"
+  }
 }
